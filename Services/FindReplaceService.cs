@@ -1,6 +1,7 @@
 ﻿using Orchard;
 using Orchard.ContentManagement;
 using Orchard.Data;
+using Orchard.Environment.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,13 +12,15 @@ namespace Moov2.Orchard.FindReplace.Services {
 
         private readonly IContentManager _contentManager;
         private readonly ITransactionManager _transactionManager;
+        private readonly ShellSettings _shellSettings;
 
         #endregion
 
         #region Constructor
 
-        public FindReplaceService(IContentManager contentManager, ITransactionManager transactionManager) {
+        public FindReplaceService(IContentManager contentManager, ShellSettings shellSettings, ITransactionManager transactionManager) {
             _contentManager = contentManager;
+            _shellSettings = shellSettings;
             _transactionManager = transactionManager;
         }
 
@@ -37,12 +40,14 @@ namespace Moov2.Orchard.FindReplace.Services {
 
         public void Replace(IList<int> itemIds, string find, string replace)
         {
+            var tableName = string.IsNullOrEmpty(_shellSettings.DataTablePrefix) ? "Orchard_Framework_ContentItemVersionRecord" : string.Format("{0}_Orchard_Framework_ContentItemVersionRecord", _shellSettings.DataTablePrefix);
+
             _transactionManager.GetSession()
-                .CreateSQLQuery(string.Format("update Orchard_Framework_ContentItemVersionRecord set [Data]=REPLACE([Data], '{0}', '{1}') WHERE Latest=1 AND ContentItemRecord_Id IN ({2})", find, replace, string.Join(",", itemIds)))
+                .CreateSQLQuery(string.Format("update {0} set [Data]=REPLACE([Data], '{1}', '{2}') WHERE Latest=1 AND ContentItemRecord_Id IN ({3})", tableName, find, replace, string.Join(",", itemIds)))
                 .ExecuteUpdate();
 
             _transactionManager.GetSession()
-                .CreateSQLQuery(string.Format("update Orchard_Framework_ContentItemVersionRecord set [Data]=REPLACE([Data], '{0}', '{1}') WHERE Latest=1 AND ContentItemRecord_Id IN ({2})", HttpUtility.UrlEncode(find), HttpUtility.UrlEncode(replace), string.Join(",", itemIds)))
+                .CreateSQLQuery(string.Format("update {0} set [Data]=REPLACE([Data], '{1}', '{2}') WHERE Latest=1 AND ContentItemRecord_Id IN ({3})", tableName, HttpUtility.UrlEncode(find), HttpUtility.UrlEncode(replace), string.Join(",", itemIds)))
                 .ExecuteUpdate();
         }
 
