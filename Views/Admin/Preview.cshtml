@@ -1,0 +1,47 @@
+﻿@model Moov2.Orchard.FindReplace.Models.PreviewModel
+
+@{
+    Script.Require("FindReplacePreview");
+}
+
+<p class="manage"><a href="/Admin/FindReplace">@T("Enter a different search term")</a></p>
+
+<h1>@Html.Raw(string.Format(T("{0} Content item(s) matching &rdquo;{1}&ldquo;").ToString(), Model.MatchCount, Model.Find))</h1>
+
+@if (!Model.HasMatches)
+{
+    <p>@T("Unable to match any content items, try another term.")</p>
+
+    using (Html.BeginForm("Preview", "Admin", FormMethod.Get))
+    {
+        <fieldset>
+            <label for="@Html.FieldIdFor(m => m.Find)">@T("Find")</label>
+            @Html.TextBoxFor(m => m.Find, new { @class = "text large", placeholder = T("Enter term you'd like to replace") })
+        </fieldset>
+
+        <fieldset>
+            <button type="submit">@T("Preview matched content items")</button>
+        </fieldset>
+    }
+}
+
+@if (Model.HasMatches)
+{
+    using (Html.BeginFormAntiForgeryPost("Replace", FormMethod.Post))
+    {
+        <fieldset>
+            <label for="Replace">@T("Replace with")</label>
+            <input id="Replace" name="Replace" type="text" placeholder="@Html.Raw(string.Format(T("Enter term you'd like to replace &rdquo;{0}&ldquo; with").ToString(), Model.Find))" class="text medium" />
+        </fieldset>
+
+        <fieldset>
+            <button type="submit">Replace selected items below</button>
+        </fieldset>
+
+        <fieldset class="contentItems bulk-items">
+            @Display(Model.Display)
+        </fieldset>
+
+        @Html.Hidden("Find", Model.Find)
+    }
+}

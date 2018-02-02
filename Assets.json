@@ -1,0 +1,8 @@
+﻿[
+  {
+    "inputs": [
+      "Assets/JavaScript/preview.js"
+    ],
+    "output": "Scripts/preview.js"
+  }
+]

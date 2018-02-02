@@ -1,0 +1,15 @@
+﻿@model Moov2.Orchard.FindReplace.Models.FindModel
+
+<h2>@T("Find &amp; Replace")</h2>
+
+@using (Html.BeginForm("Preview", "Admin", FormMethod.Get))
+{
+    <fieldset>
+        <label for="@Html.FieldIdFor(m => m.Find)">@T("Find")</label>
+        @Html.TextBoxFor(m => m.Find, new { @class = "text large", placeholder = T("Enter term you'd like to replace") })
+    </fieldset>
+
+    <fieldset>
+        <button type="submit">@T("Preview matched content items")</button>
+    </fieldset>
+}
