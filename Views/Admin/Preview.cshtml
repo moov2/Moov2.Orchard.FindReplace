@@ -32,6 +32,7 @@
         <fieldset>
             <label for="Replace">@T("Replace with")</label>
             <input id="Replace" name="Replace" type="text" placeholder="@Html.Raw(string.Format(T("Enter term you'd like to replace &rdquo;{0}&ldquo; with").ToString(), Model.Find))" class="text medium" />
+            <p class="hint">Leave empty to replace with nothing.</p>
         </fieldset>
 
         <fieldset>
