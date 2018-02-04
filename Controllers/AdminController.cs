@@ -6,12 +6,14 @@ using Orchard.ContentManagement.Aspects;
 using Orchard.DisplayManagement;
 using Orchard.Environment.Extensions;
 using Orchard.Localization;
+using Orchard.UI.Admin;
 using Orchard.UI.Notify;
 using System.Linq;
 using System.Web.Mvc;
 
 namespace Moov2.Orchard.FindReplace.Controllers {
     [OrchardFeature("Moov2.Orchard.FindReplace")]
+    [ValidateInput(false), Admin]
     public class AdminController : Controller {
         #region Dependencies
 
@@ -41,11 +43,17 @@ namespace Moov2.Orchard.FindReplace.Controllers {
         #region Actions
 
         public ActionResult Index() {
+            if (!_orchardServices.Authorizer.Authorize(Permissions.AccessFindReplace, T("Unable to access Find/Replace")))
+                return new HttpUnauthorizedResult();
+
             return View();
         }
 
         public ActionResult Preview(string find)
         {
+            if (!_orchardServices.Authorizer.Authorize(Permissions.AccessFindReplace, T("Unable to access Find/Replace")))
+                return new HttpUnauthorizedResult();
+
             var contentItems = _findReplaceService.GetContentItems(find).OrderBy(x => x.As<ITitleAspect>().Title);
 
             var model = new PreviewModel
@@ -62,6 +70,9 @@ namespace Moov2.Orchard.FindReplace.Controllers {
 
         [HttpPost]
         public ActionResult Replace(ReplaceModel model) {
+            if (!_orchardServices.Authorizer.Authorize(Permissions.AccessFindReplace, T("Unable to access Find/Replace")))
+                return new HttpUnauthorizedResult();
+
             _findReplaceService.Replace(model.ItemIds, model.Find, model.Replace);
 
             _orchardServices.Notifier.Add(NotifyType.Information, T("Successfully updated {0} content item(s).", model.ItemIds.Count));
