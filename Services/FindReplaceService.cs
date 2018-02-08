@@ -39,11 +39,11 @@ namespace Moov2.Orchard.FindReplace.Services
 
         public IEnumerable<IContent> GetContentItems(string term)
         {
-            var encodedTerm = HttpUtility.UrlEncode(term);
-
             var tableName = GetContentItemVersionRecordTableName();
             var matches = _transactionManager.GetSession()
-                .CreateSQLQuery(string.Format("SELECT ContentItemRecord_Id FROM {0} WHERE Latest=1 AND ([Data] LIKE '%{1}%' ESCAPE '!' OR [Data] LIKE '%{2}%' ESCAPE '!')", tableName, LikeEscape(term), LikeEscape(encodedTerm)))
+                .CreateSQLQuery($"SELECT ContentItemRecord_Id FROM {tableName} WHERE Latest=1 AND ([Data] LIKE :unencoded ESCAPE '!' OR [Data] LIKE :encoded ESCAPE '!')")
+                .SetParameter("unencoded", $"%{LikeEscape(term)}%")
+                .SetParameter("encoded", $"%{LikeEscape(HttpUtility.UrlEncode(term))}%")
                 .List<int>();
 
             return _contentManager.GetMany<ContentItem>(matches, VersionOptions.Published, QueryHints.Empty);
@@ -54,10 +54,16 @@ namespace Moov2.Orchard.FindReplace.Services
             var tableName = GetContentItemVersionRecordTableName();
             var session = _transactionManager.GetSession();
 
-            session.CreateSQLQuery(string.Format("update {0} set [Data]=REPLACE([Data], '{1}', '{2}') WHERE Latest=1 AND ContentItemRecord_Id IN ({3})", tableName, find, replace, string.Join(",", itemIds)))
+            session.CreateSQLQuery($"update {tableName} set [Data]=REPLACE([Data], :find, :replace) WHERE Latest=1 AND ContentItemRecord_Id IN (:itemIds)")
+                .SetParameter("find", find)
+                .SetParameter("replace", replace)
+                .SetParameterList("itemIds", itemIds)
                 .ExecuteUpdate();
 
-            session.CreateSQLQuery(string.Format("update {0} set [Data]=REPLACE([Data], '{1}', '{2}') WHERE Latest=1 AND ContentItemRecord_Id IN ({3})", tableName, HttpUtility.UrlEncode(find), HttpUtility.UrlEncode(replace), string.Join(",", itemIds)))
+            session.CreateSQLQuery($"update {tableName} set [Data]=REPLACE([Data], :find, :replace) WHERE Latest=1 AND ContentItemRecord_Id IN (:itemIds)")
+                .SetParameter("find", HttpUtility.UrlEncode(find))
+                .SetParameter("replace", HttpUtility.UrlEncode(replace))
+                .SetParameterList("itemIds", itemIds)
                 .ExecuteUpdate();
 
             var contentItems = _contentManager.GetMany<ContentItem>(itemIds, VersionOptions.Published, QueryHints.Empty);
