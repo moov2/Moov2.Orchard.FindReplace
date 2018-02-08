@@ -59,12 +59,16 @@ namespace Moov2.Orchard.FindReplace.Services
                 .SetParameter("replace", replace)
                 .SetParameterList("itemIds", itemIds)
                 .ExecuteUpdate();
-
-            session.CreateSQLQuery($"update {tableName} set [Data]=REPLACE([Data], :find, :replace) WHERE Latest=1 AND ContentItemRecord_Id IN (:itemIds)")
-                .SetParameter("find", HttpUtility.UrlEncode(find))
-                .SetParameter("replace", HttpUtility.UrlEncode(replace))
-                .SetParameterList("itemIds", itemIds)
-                .ExecuteUpdate();
+            if (find != null && find.Equals(HttpUtility.UrlEncode(find), System.StringComparison.OrdinalIgnoreCase))
+            {
+                // only run URLencode replace if necessary otherwise
+                // if 'replace' contains 'term' you end up with doubled up result
+                session.CreateSQLQuery($"update {tableName} set [Data]=REPLACE([Data], :find, :replace) WHERE Latest=1 AND ContentItemRecord_Id IN (:itemIds)")
+                    .SetParameter("find", HttpUtility.UrlEncode(find))
+                    .SetParameter("replace", HttpUtility.UrlEncode(replace))
+                    .SetParameterList("itemIds", itemIds)
+                    .ExecuteUpdate();
+            }
 
             var contentItems = _contentManager.GetMany<ContentItem>(itemIds, VersionOptions.Published, QueryHints.Empty);
             var utcNow = _clock.UtcNow;
