@@ -2,7 +2,7 @@
 AntiForgery: enabled
 Author: Moov2
 Website: http://moov2.com
-Version: 1.0
+Version: 1.1
 OrchardVersion: 1.10
 Description: Find and replace text in contents and parts
 Category: Content
