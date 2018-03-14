@@ -77,7 +77,6 @@ namespace Moov2.Orchard.FindReplace.Services
             {
                 contentItem.As<CommonPart>().ModifiedUtc = utcNow;
                 contentItem.As<CommonPart>().VersionModifiedUtc = utcNow;
-                contentItem.As<CommonPart>().VersionModifiedBy = GetUserName();
             }
         }
 
