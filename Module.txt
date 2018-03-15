@@ -2,11 +2,11 @@
 AntiForgery: enabled
 Author: Moov2
 Website: http://moov2.com
-Version: 1.1
-OrchardVersion: 1.10
+Version: 1.1.0
+OrchardVersion: 1.9.2
 Description: Find and replace text in contents and parts
 Category: Content
 Features:
     Moov2.Orchard.FindReplace:
         Description: Find and replace text in contents and parts
-		Dependencies: UrlAlternates
+        Dependencies: UrlAlternates
